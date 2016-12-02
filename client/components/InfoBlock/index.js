@@ -95,8 +95,8 @@ const PiplOption = (props) => {
     <div className="PiplOption">
       {props.isFirst ? (
         <IconButton
-          className="PiplOption-mostlikly"
-          tooltip="Most Likly Match"
+          className="PiplOption-mostlikely"
+          tooltip="Most likely Match"
           touch={true}
           tooltipPosition="bottom-left"
         >
