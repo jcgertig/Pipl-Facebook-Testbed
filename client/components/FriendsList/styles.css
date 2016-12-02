@@ -1,0 +1,16 @@
+/** @define FreindsList; use strict */
+
+.FreindsList {
+  max-height: 100%;
+  overflow-y: auto;
+
+  span[type="button"] {
+    -webkit-appearance: initial;
+  }
+}
+
+.FreindsList-actions {
+  align-items: center;
+  justify-content: center;
+  display: flex;
+}

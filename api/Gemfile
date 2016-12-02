@@ -1,0 +1,78 @@
+source 'http://rubygems.org'
+
+gem "active_model_serializers"
+gem "devise", github: "plataformatec/devise"
+gem "fuzzily", github: "mprasolov/fuzzily" # Good simple indexing
+gem "omniauth"
+gem "omniauth-facebook"
+gem "piplapis-ruby"
+gem "proof", github: "jcgertig/proof"
+gem "pundit"
+
+gem "rack-cors" # server settings
+gem "rack-rewrite" # server settings
+gem "validates" # active model validators
+
+# Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
+gem 'rails', '>= 5.0.0.beta2', '< 5.1'
+# Use Puma as the app server
+gem 'puma'
+
+gem 'turbolinks'
+
+# Use SCSS for stylesheets
+gem 'sass-rails', '~> 5.0'
+# Use Uglifier as compressor for JavaScript assets
+gem 'uglifier', '>= 1.3.0'
+# Use CoffeeScript for .coffee assets and views
+gem 'coffee-rails', '~> 4.1.0'
+# See https://github.com/rails/execjs#readme for more supported runtimes
+# gem 'therubyracer', platforms: :ruby
+
+# Use jquery as the JavaScript library
+gem 'jquery-rails'
+# Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
+gem 'jbuilder', '~> 2.0'
+# Action Cable dependencies for the Redis adapter
+gem 'redis', '~> 3.0'
+# Use ActiveModel has_secure_password
+# gem 'bcrypt', '~> 3.1.7'
+
+# Use Capistrano for deployment
+# gem 'capistrano-rails', group: :development
+
+# FOR HEROKU #
+group :production do
+  gem "pg"
+  gem "rails_12factor"
+end
+
+group :development, :test do
+  gem "web-console", "~> 3.0"
+  gem "annotate"
+  gem "better_errors"
+  gem "certified"
+  gem "dotenv-rails"
+  gem "factory_girl_rails"
+  gem "foreman"
+  gem "pry-rails"
+  gem "pry-remote"
+  gem "pry-stack_explorer"
+  gem "quiet_assets"
+  gem "rails-erd"
+  gem "rspec-rails"
+  gem "spring"
+  gem "guard"
+  gem "guard-rspec"
+  gem "rubocop"
+  gem "rubocop-rspec"
+  gem "guard-rubocop"
+  gem "database_cleaner"
+  gem "faker"
+  gem "shoulda-matchers"
+  gem "sqlite3"
+  gem "capybara"
+end
+
+# Windows does not include zoneinfo files, so bundle the tzinfo-data gem
+gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]

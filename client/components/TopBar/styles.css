@@ -1,0 +1,103 @@
+/** @define TopBar; use strict */
+
+.TopBar {
+  max-width: 1400px;
+  width: calc(90% - 84px);
+  margin: 0 auto;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.is-sticky {
+  background-color: $lightbgColor;
+  box-shadow: 0px 0px 75px 0px rgba(136,119,177,0.20);
+
+  .TopBar {
+    height: 60px;
+    padding-bottom: 0px;
+  }
+
+  .TopBar-logo {
+    width: 100px;
+  }
+
+  .TopBar-link {
+    padding-bottom: 5px;
+  }
+
+  .TopBar-profile-img {
+    img {
+      width: 30px;
+    }
+  }
+}
+
+.TopBar-col-left, .TopBar-col-center, .TopBar-col-right {
+  display: flex;
+  flex: 1;
+  align-items: center;
+}
+
+.TopBar-col-center {
+  justify-content: space-around;
+}
+
+.TopBar-col-right {
+  justify-content: flex-end;
+
+  ul {
+    li {
+      vertical-align: middle;
+    }
+  }
+
+}
+
+.TopBar-logo {
+  width: 140px;
+}
+
+.TopBar-link {
+  font-size: 16px;
+  line-height: 24px;
+  padding-bottom: 13px;
+  text-decoration: none;
+}
+
+.TopBar-list-link {
+  li {
+    margin-left: 50px;
+  }
+}
+
+.TopBar-link-active {
+  color: $FontColor;
+  border-bottom: 2px solid $darkPurple;
+}
+
+.TopBar-profile {
+  height: 40px;
+}
+
+.TopBar-notifications {
+  width: 32px;
+}
+
+.TopBar-icon-cage {
+  display: inline-block;
+  svg, img {
+    width: 24px;
+    height: auto;
+  }
+}
+
+.TopBar-profile-img {
+  display: inline-block;
+  img {
+    width: 40px;
+    height: auto;
+  }
+}

@@ -1,0 +1,32 @@
+/** @define Modal; use strict */
+
+.Modal {
+  background-color: rgba(241, 245, 248, 0.93);
+  background-color: rgba(242, 244, 252, 0.9);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100vh;
+  width: 100vw;
+  z-index: 10000;
+  overflow-y: auto;
+  animation-duration: .2s !important;
+}
+
+.Modal-content {
+  max-width: calc(1400px - 15px);
+  width: calc(90% - 15px);
+  height: 100vh;
+  margin: 0 auto;
+  padding-right: 15px;
+  position: relative;
+}
+
+.Modal-close {
+  position: fixed;
+  top: 62px;
+  right: 45px;
+  cursor: pointer;
+}

@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500');
+
+* {
+  font-family: 'Roboto', sans-serif;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  color: $fontColor;
+}
+
+a {
+  text-decoration: none;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}

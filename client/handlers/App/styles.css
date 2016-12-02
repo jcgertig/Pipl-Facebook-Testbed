@@ -1,0 +1,61 @@
+/** @define App; use strict */
+
+.App {
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.App:before {
+  content: "";
+  position: fixed;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 300px;
+  background-color: $lightbgColor;
+}
+
+.App:after {
+  content: none;
+  position: fixed;
+  z-index: -1;
+  top: 300px;
+  left: 0;
+  right: 0;
+  height: calc(100vh - 300px);
+  background-color: $lightBlue;
+}
+
+.App-content {
+  background-color: $lightbgColor;
+  max-width: 1400px;
+  width: 90%;
+  margin: 0 auto;
+  min-height: calc(100vh - 41px);
+  margin-bottom: 41px;
+  box-shadow: 0px 0px 75px $dropShadow;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+}
+
+.App-col-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+}
+
+.App-col-2 {
+  display: flex;
+  flex: 2;
+  border-right: 1px solid $lightGrey;
+  flex-direction: column;
+}
+
+.App-col-8 {
+  display: flex;
+  flex: 8;
+  flex-direction: column;
+}

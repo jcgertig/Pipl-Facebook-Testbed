@@ -1,0 +1,45 @@
+/** @define Base; use strict */
+@import 'normalize.css';
+@import 'animate.css';
+
+@import 'typography.css';
+
+* {
+  box-sizing: border-box;
+}
+
+*:before {
+  box-sizing: border-box;
+}
+
+*:after {
+  box-sizing: border-box;
+}
+
+*[type="button"] {
+  -webkit-appearance: initial !important;
+}
+
+body {
+  background-color: $bgColor;
+
+  &.scrolling {
+    padding-top: 380px;
+  }
+}
+
+h1 {
+  text-align: center;
+  font-size: 36px;
+  line-height: 43px;
+  letter-spacing: 0.43px;
+  font-weight: 500;
+}
+
+.Base {
+
+}
+
+.Clickable {
+  cursor: pointer;
+}
