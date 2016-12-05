@@ -1,7 +1,7 @@
 require('./styles.css');
 
 import React, { Component, PropTypes } from 'react';
-import { isString, get, has, isEqual } from 'lodash';
+import { isString, get, has, isEqual, isUndefined } from 'lodash';
 
 import { keysToCamel } from 'utils/general';
 import { compareAll, clean } from 'utils/pipl';
@@ -46,6 +46,34 @@ const mapping = {
       return clean(`${prefix} ${first} ${middle} ${last} ${postfix}`);
     },
     text: 'Relationships',
+  },
+  'jobs': {
+    collection: true,
+    path: (item) => {
+      const { title, organization, dateRange } = item;
+      return (
+        <div style={{marginBottom: '10px'}}>
+          <div>{title}</div>
+          <div>{organization}</div>
+          {dateRange ? <div>{dateRange.start} - {isUndefined(dateRange.end) ? 'Present' : dateRange.end}</div> : null}
+        </div>
+      );
+    },
+    text: 'Jobs',
+  },
+  'educations': {
+    collection: true,
+    path: (item) => {
+      const { degree, school, dateRange } = item;
+      return (
+        <div style={{marginBottom: '10px'}}>
+          <div>{degree}</div>
+          <div>{school}</div>
+          {dateRange ? <div>{dateRange.start} - {isUndefined(dateRange.end) ? 'Present' : dateRange.end}</div> : null}
+        </div>
+      );
+    },
+    text: 'Education',
   },
   'usernames': {
     collection: true,
