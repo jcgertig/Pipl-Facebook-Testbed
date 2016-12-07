@@ -1,18 +1,20 @@
+/* global d3 */
+
 require('./styles.css');
 
 import React, { Component, PropTypes } from 'react';
-import { isString, get, has, isEqual, isUndefined } from 'lodash';
+import ReactDOM from 'react-dom';
+import { isString, get, has, isEqual, isUndefined, cloneDeep } from 'lodash';
 
 import { keysToCamel } from 'utils/general';
-import { compareAll, clean } from 'utils/pipl';
+import { buildConnections, clean } from 'utils/pipl';
+import { updateGraph, enterNode, enterLink, updateNode, updateLink, genNodes } from 'utils/graph';
 
-import Divider from 'material-ui/Divider';
-import IconButton from 'material-ui/IconButton';
-import CheckIcon from 'material-ui/svg-icons/toggle/check-box';
 import CircularProgress from 'material-ui/CircularProgress';
 
 const mapping = {
   'names': {
+    node: false,
     collection: true,
     path: ({ first, last, middle, prefix, postfix }) => {
       return clean(`${prefix} ${first} ${middle} ${last} ${postfix}`);
@@ -76,6 +78,7 @@ const mapping = {
     text: 'Education',
   },
   'usernames': {
+    node: false,
     collection: true,
     path: 'content',
     text: 'Usernames',
@@ -121,16 +124,6 @@ const PiplOption = (props) => {
 
   return (
     <div className="PiplOption">
-      {props.isFirst ? (
-        <IconButton
-          className="PiplOption-mostlikely"
-          tooltip="Most likely Match"
-          touch={true}
-          tooltipPosition="bottom-left"
-        >
-          <CheckIcon />
-        </IconButton>
-      ) : null}
       {renderFromMapping()}
     </div>
   );
@@ -138,51 +131,155 @@ const PiplOption = (props) => {
 
 PiplOption.propTypes = {
   option: PropTypes.object.isRequired,
-  value: PropTypes.any.isRequired,
-  isFirst: PropTypes.bool.isRequired,
 };
 
+class Graph extends Component {
+
+  componentWillMount() {
+    this.force = d3.layout.force()
+      .charge(-300)
+      .linkDistance(50)
+      .size([this.props.width, this.props.height]);
+  }
+
+  componentDidMount() {
+    this.d3Graph = d3.select(ReactDOM.findDOMNode(this.graph));
+    this.force.on('tick', () => {
+      // after force calculation starts, call updateGraph
+      // which uses d3 to manipulate the attributes,
+      // and React doesn't have to go through lifecycle on each tick
+      this.d3Graph.call((sel) => updateGraph(sel, this.props.nodes));
+    });
+  }
+
+  shouldComponentUpdate(nextProps) {
+    this.d3Graph = d3.select(ReactDOM.findDOMNode(this.graph));
+
+    const d3Nodes = this.d3Graph.selectAll('.node')
+      .data(nextProps.nodes, (node) => node.key);
+    d3Nodes.enter().append('g').call((selection) => enterNode(selection, this.force));
+    d3Nodes.exit().remove();
+    d3Nodes.call(updateNode);
+
+    const d3Links = this.d3Graph.selectAll('.link')
+      .data(nextProps.links, (link) => link.key);
+    d3Links.enter().insert('line', '.node').call(enterLink);
+    d3Links.exit().remove();
+    d3Links.call((sel) => updateLink(sel, nextProps.nodes));
+
+    // we should actually clone the nodes and links
+    // since we're not supposed to directly mutate
+    // props passed in from parent, and d3's force function
+    // mutates the nodes and links array directly
+    // we're bypassing that here for sake of brevity in example
+    this.force.nodes(nextProps.nodes).links(nextProps.links);
+    this.force.start();
+
+    return false;
+  }
+
+  render() {
+    return (
+      <svg width={this.props.width} height={this.props.height}>
+        <g ref={(i) => (this.graph = i)} />
+      </svg>
+    );
+  }
+}
+
 class InfoBlock extends Component {
-  state = { comparing: false, compared: [] };
+  state = { comparing: false, compared: {}, nodes: [], links: [] };
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.user !== null && !isEqual(nextProps.user, this.props.user)) {
-      const { pipl } = nextProps.user;
-      if (pipl && pipl.baseData !== null) {
-        this.setState({ comparing: true });
-        compareAll(nextProps.currentUser.piplData.base_data, pipl.baseData)
+    const { compared } = this.state;
+    const { addressLatLang, currentUser } = nextProps;
+    const modUser = (user) => {
+      const _user = cloneDeep(user);
+      _user.id = _user.uid;
+      _user.pipl = { value: 1, pipl: _user.piplData.base_data };
+      return _user;
+    };
+    const users = cloneDeep(nextProps.users);
+    if (users.length > 0 && !isEqual(users, this.props.users)) {
+      users.push({ friend: modUser(currentUser), index: -1 });
+      for (const userA of users) {
+        const otherUsers = users.filter(user => user.friend.id !== userA.friend.id).map(user => user.friend);
+        buildConnections(addressLatLang, userA.friend, otherUsers, compared)
           .then(val => {
-            this.setState({ comparing: false, compared: val });
+            const newCompared = val.compared;
+            console.log('newCompared', newCompared);
+            const { nodes, links } = genNodes(mapping, users, newCompared, this.state.nodes, this.block.clientWidth, this.block.clientHeight);
+            this.setState({ compared: newCompared, nodes, links });
           });
       }
     }
   }
 
   renderPipl = () => {
-    const { pipl, name } = this.props.user;
-    if (!this.state.comparing) {
-      if (this.state.compared.length > 0) {
-        return this.state.compared.map((option, i) => (
-          <PiplOption option={option.pipl} value={option.value} isFirst={i === 0} key={`${name}-${i}`} />
-        ));
-      }
-      if (pipl && pipl.baseData === null) {
+    if (this.props.users.length === 1) {
+      return this.props.users.map(({ friend }, i) => {
+        if (!has(friend, 'pipl')) {
+          return (
+            <div className="PiplOption" key={`${friend.name}-${i}`}>
+              <div className="PiplOption-wrapper is-loading">
+                <div className="text-center" style={{ marginBottom: '10px'}}>
+                  Getting Pipl Data For Friend
+                </div>
+                <CircularProgress size={80} thickness={5} />
+              </div>
+            </div>
+          );
+        }
+        if (friend.pipl === null) {
+          return (
+            <div className="PiplOption" key={`${friend.name}-${i}`}>
+              <div className="PiplOption-wrapper">
+                <div className="text-center">
+                  No Pipl Data Available For Selected Friend
+                </div>
+              </div>
+            </div>
+          );
+        }
+        return (
+          <PiplOption
+            option={friend.pipl.pipl}
+            value={friend.pipl.value}
+            name={friend.name}
+            key={`${friend.name}-${i}`}
+          />
+        );
+      });
+    }
+    if (this.props.users.length > 1) {
+      if (Object.keys(this.state.compared).length === 0) {
         return (
           <div className="PiplOption">
-            <div className="PiplOption-wrapper">
-              <div className="text-center">No Pipl Data Available</div>
+            <div className="PiplOption-wrapper is-loading">
+              <div className="text-center" style={{ marginBottom: '10px'}}>
+                Comparing Friends
+              </div>
+              <CircularProgress size={80} thickness={5} />
             </div>
           </div>
         );
       }
+
+      return (
+        <Graph
+          width={this.block.clientWidth}
+          height={815}
+          nodes={this.state.nodes}
+          links={this.state.links}
+        />
+      );
     }
     return (
       <div className="PiplOption">
-        <div className="PiplOption-wrapper is-loading">
-          <div className="text-center" style={{ marginBottom: '10px'}}>
-            Loading
+        <div className="PiplOption-wrapper">
+          <div className="text-center">
+            Select friends from the list to view or compare
           </div>
-          <CircularProgress size={80} thickness={5} />
         </div>
       </div>
     );
@@ -192,9 +289,7 @@ class InfoBlock extends Component {
     const { user } = this.props;
     if (user !== null) {
       return (
-        <div className="InfoBlock">
-          <h1>{user.name}</h1>
-          <Divider />
+        <div className="InfoBlock" ref={block => { if (block !== null) { this.block = block; } }}>
           {this.renderPipl()}
         </div>
       );
@@ -205,12 +300,13 @@ class InfoBlock extends Component {
   static displayName = 'InfoBlock';
 
   static propTypes = {
-    user: PropTypes.object,
+    users: PropTypes.array,
     currentUser: PropTypes.object,
+    addressLatLang: PropTypes.object,
   };
 
   static defaultProps = {
-    user: null,
+    users: [],
   };
 
 }

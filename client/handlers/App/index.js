@@ -22,7 +22,7 @@ import InfoBlock from 'InfoBlock';
 
 class App extends Component {
 
-  state = { selectedUser: null, drawerOpen: false, width: null, height: null };
+  state = { selectedUsers: [], drawerOpen: false, width: null, height: null };
 
   componentWillMount() {
     if (this.props.token.length === 0) {
@@ -67,16 +67,19 @@ class App extends Component {
     this.props.dispatch(logout());
   };
 
-  handleSelection = (selectedUser, index) => {
-    if (!has(selectedUser, 'pipl')) {
-      const { firstName, lastName, id } = selectedUser;
-      this.props.dispatch(getPiplForFriend(firstName, lastName, id, index));
+  handleSelection = (selectedUsers) => {
+    const noPipl = selectedUsers.filter((item) => !has(item.friend, 'pipl'));
+    if (noPipl.length > 0) {
+      for (const person of noPipl) {
+        const { friend: { firstName, lastName, id }, index } = person;
+        this.props.dispatch(getPiplForFriend(firstName, lastName, id, index));
+      }
     }
-    this.setState({ selectedUser });
+    this.setState({ selectedUsers });
   };
 
   render() {
-    const { currentUser, friends, hasMoreFriends } = this.props;
+    const { currentUser, friends, hasMoreFriends, addressLatLang } = this.props;
     const { width } = this.state;
     if (currentUser === null || friends.length === 0) { return <BasicLoader />; }
 
@@ -112,13 +115,11 @@ class App extends Component {
                 </Subheader>
                 <Divider />
                 <div className="App-info-content">
-                  {this.state.selectedUser !== null ? (
-                    <InfoBlock
-                      key={this.state.selectedUser.id}
-                      user={this.state.selectedUser}
-                      currentUser={currentUser}
-                    />
-                  ) : null}
+                  <InfoBlock
+                    users={this.state.selectedUsers}
+                    currentUser={currentUser}
+                    addressLatLang={addressLatLang}
+                  />
                 </div>
               </div>
             </div>

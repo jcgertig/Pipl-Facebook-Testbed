@@ -1,7 +1,8 @@
 /** @define InfoBlock; use strict */
 
 .InfoBlock {
-
+  position: relative;
+  height: 100%;
 }
 
 .PiplOption {
@@ -36,4 +37,21 @@
 
 .PiplOption-value {
   flex: 1;
+}
+
+.node circle {
+  fill: #888888;
+  stroke: #fff;
+  stroke-width: 2px;
+}
+
+.node text {
+  fill: #888888;
+  stroke: none;
+  font-size: .6em;
+}
+
+.link {
+  stroke: #cccccc;
+  stroke-opacity: .6;
 }

@@ -1,6 +1,6 @@
 require 'pipl'
 Pipl.configure do |c|
-  c.api_key = 'BUSINESS-PREMIUM-9n8yhi1dxinxp0c4cyaddfsy'
+  c.api_key = 'BUSINESS-PREMIUM-vu16x5wafwviewx11chhzs2p'
   c.show_sources = 'all'
   c.minimum_probability = 0.0000001
   c.minimum_match = 0.0004

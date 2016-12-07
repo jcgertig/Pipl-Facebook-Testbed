@@ -1,5 +1,5 @@
 /* global google, Promise */
-import { sortBy, has, get, isUndefined, isFunction, isString } from 'lodash';
+import { sortBy, has, get, isUndefined, isFunction, isString, isPlainObject } from 'lodash';
 
 export const clean = (str) => {
   if (isUndefined(str) || str === null) { return ''; }
@@ -18,11 +18,13 @@ export const clean = (str) => {
     .replace(/,\s,/g, ',');
 };
 
-function compareString(stringA, stringB) {
+export function compareString(addressLatLang, stringA, stringB) {
   return new Promise((done, fail) => {
     let val = 0;
     if (stringA === stringB) {
-      return done(1);
+      return done({ data: { valA: stringA, valB: stringB }, _val: 1 });
+    } else if (stringA.length === 0 || stringB.length === 0) {
+      return done({ data: { valA: stringA, valB: stringB }, _val: 0 });
     } else {
       if (stringB.indexOf(stringA) > -1) {
         val += 0.33;
@@ -31,15 +33,15 @@ function compareString(stringA, stringB) {
         val += 0.33;
       }
     }
-    return done(val);
+    return done({ data: { valA: stringA, valB: stringB }, _val: val });
   });
 }
 
-const addresToString = ({ house, street, city, state, zipCode, country }) => {
+export function addressToString({ house, street, city, state, zipCode, country }) {
   return clean(`${house} ${street}, ${city}, ${state} ${zipCode}, ${country}`);
-};
+}
 
-function getLatLng(address) {
+function getLatLng(addressLatLang, address) {
   const geocoder = new google.maps.Geocoder();
 
   return new Promise((done, fail) => {
@@ -51,31 +53,52 @@ function getLatLng(address) {
         if (status === 'OVER_QUERY_LIMIT') {
           return setTimeout(makeCall, 2000);
         }
-        console.log('getLatLng', status, results);
         return fail();
       });
     };
-    makeCall();
+    if (has(addressLatLang, address)) {
+      done(addressLatLang[address]);
+    } else {
+      makeCall();
+    }
   });
 }
 
-function compareAddress(addressesA, addressesB) {
+export function distanceBetween(locA, locB) {
+  if (isPlainObject(locA)) {
+    locA._lat = locA.lat;
+    locA.lat = () => locA._lat;
+    locA._lng = locA.lng;
+    locA.lng = () => locA._lng;
+  }
+  if (isPlainObject(locB)) {
+    locB._lat = locB.lat;
+    locB.lat = () => locB._lat;
+    locB._lng = locB.lng;
+    locB.lng = () => locB._lng;
+  }
+  return google.maps.geometry.spherical.computeDistanceBetween(locA, locB);
+}
+
+export function compareAddress(addressLatLang, addressesA, addressesB) {
   return new Promise((done, fail) => {
     let val = 0;
-    const _valA = addresToString(addressesA);
-    const _valB = addresToString(addressesB);
-    if (_valA.length <= 3 || _valB.length <= 3) { return done(val); }
-    return Promise.all([getLatLng(_valA), getLatLng(_valB)])
+    const _valA = addressToString(addressesA);
+    const _valB = addressToString(addressesB);
+    if (_valA.length <= 3 || _valB.length <= 3) { return done({ _val: val }); }
+    return Promise.all([getLatLng(addressLatLang, _valA), getLatLng(addressLatLang, _valB)])
       .then(([valA, valB]) => {
-        const distance = google.maps.geometry.spherical.computeDistanceBetween(valA, valB);
+        const distance = distanceBetween(valA, valB);
         const diff = distance - 40234;
         if (diff <= 0) {
           const tenth = 40234 / 10;
           val += ((40234 - (40234 - Math.abs(diff))) / tenth) * 0.33;
         }
-        done(val);
+        addressLatLang[_valA] = valA;
+        addressLatLang[_valB] = valB;
+        done({ data: { valA: _valA, valB: _valB }, other: 'thing', _val: val });
       })
-      .catch(() => done(val));
+      .catch((dat) => done({ _val: val }));
   });
 }
 
@@ -103,11 +126,18 @@ const compareisons = {
   },
 };
 
-export function compare(piplA, piplB) {
+export function getConnections(addressLatLang, piplA, piplB) {
   return new Promise((done, fail) => {
-    let val = 0;
+    const connections = {};
     const proms = [];
-    const addVal = (_val) => { val += _val; };
+    const addVal = function(key, { _val, data }) {
+      if (!has(connections, key)) {
+        connections[key] = [];
+      }
+      if (_val > 0) {
+        connections[key].push(data);
+      }
+    };
     for (const key of Object.keys(compareisons)) {
       if (has(piplA, key) && has(piplB, key)) {
         const { attr, addSection, addAttr, action } = compareisons[key];
@@ -124,7 +154,70 @@ export function compare(piplA, piplB) {
                 valB = get(valB, attr);
               }
             }
-            proms.push(action(clean(valA), clean(valB)).then(addVal));
+            proms.push(action(addressLatLang, clean(valA), clean(valB)).then(addVal.bind(this, key)));
+          }
+        }
+        if (!isUndefined(addSection) && has(piplA, addSection)) {
+          const section = compareisons[addSection];
+          for (const itemA of piplA[addSection]) {
+            for (const itemB of piplB[key]) {
+              let valA = itemA;
+              let valB = itemB;
+              if (!isUndefined(addAttr)) {
+                if (isFunction(addAttr)) {
+                  valA = addAttr(valA);
+                } else {
+                  valA = get(valA, addAttr);
+                }
+              } else if (!isUndefined(section.attr)) {
+                if (isFunction(section.attr)) {
+                  valA = section.attr(valA);
+                } else {
+                  valA = get(valA, section.attr);
+                }
+              }
+              if (!isUndefined(attr)) {
+                if (isFunction(attr)) {
+                  valB = attr(valB);
+                } else {
+                  valB = get(valB, attr);
+                }
+              }
+              proms.push(action(clean(valA), clean(valB)).then(addVal.bind(this, key)));
+            }
+          }
+        }
+      }
+    }
+
+    Promise.all(proms)
+      .then(() => done(connections))
+      .catch(() => done(connections));
+  });
+}
+
+export function compare(addressLatLang, piplA, piplB) {
+  return new Promise((done, fail) => {
+    let val = 0;
+    const proms = [];
+    const addVal = ({ _val }) => { val += _val; };
+    for (const key of Object.keys(compareisons)) {
+      if (has(piplA, key) && has(piplB, key)) {
+        const { attr, addSection, addAttr, action } = compareisons[key];
+        for (const itemA of piplA[key]) {
+          for (const itemB of piplB[key]) {
+            let valA = itemA;
+            let valB = itemB;
+            if (!isUndefined(attr)) {
+              if (isFunction(attr)) {
+                valA = attr(valA);
+                valB = attr(valB);
+              } else {
+                valA = get(valA, attr);
+                valB = get(valB, attr);
+              }
+            }
+            proms.push(action(addressLatLang, clean(valA), clean(valB)).then(addVal));
           }
         }
         if (!isUndefined(addSection) && has(piplA, addSection)) {
@@ -161,14 +254,42 @@ export function compare(piplA, piplB) {
     }
 
     Promise.all(proms)
-      .then(() => {
-        done(val);
-      })
+      .then(() => done(val))
       .catch(() => done(val));
   });
 }
 
-export function compareAll(piplA, pipls) {
+export function buildConnections(addressLatLang, userA, pipls, compared) {
+  return new Promise((done, fail) => {
+    if (userA === null || pipls === null) {
+      return done(null);
+    }
+    const proms = [];
+    for (const pipl of pipls) {
+      if (has(compared, `${userA.id}-vs-${pipl.id}`) || has(compared, `${pipl.id}-vs-${userA.id}`)) {
+        return null;
+      }
+      if (!has(userA, 'pipl') || !has(pipl, 'pipl') || !has(userA.pipl, 'pipl') || !has(pipl.pipl, 'pipl')) {
+        return null;
+      }
+      if (userA.pipl.pipl === null || pipl.pipl.pipl === null) {
+        return null;
+      }
+
+      proms.push(getConnections(addressLatLang, userA.pipl.pipl, pipl.pipl.pipl).then((data) => {
+        if (has(compared, `${userA.id}-vs-${pipl.id}`) || has(compared, `${pipl.id}-vs-${userA.id}`)) {
+          return null;
+        }
+        compared[`${userA.id}-vs-${pipl.id}`] = { userA, userB: pipl, data };
+      }));
+    }
+    return Promise.all(proms)
+      .then(() => done({ compared, addressLatLang }))
+      .catch(() => done({ compared, addressLatLang }));
+  });
+}
+
+export function compareAll(addressLatLang, piplA, pipls) {
   return new Promise((done, fail) => {
     if (piplA === null || pipls === null) {
       return done(null);
@@ -176,12 +297,12 @@ export function compareAll(piplA, pipls) {
     const vals = [];
     const proms = [];
     for (const pipl of pipls) {
-      proms.push(compare(piplA, pipl).then((value) => {
+      proms.push(compare(addressLatLang, piplA, pipl).then((value) => {
         vals.push({ pipl, value });
       }));
     }
     return Promise.all(proms)
-      .then(() => done(sortBy(vals, ['value']).reverse()))
-      .catch(() => done(sortBy(vals, ['value']).reverse()));
+      .then(() => done({ data: sortBy(vals, ['value']).reverse(), addressLatLang }))
+      .catch(() => done({ data: sortBy(vals, ['value']).reverse(), addressLatLang }));
   });
 }

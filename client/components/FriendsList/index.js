@@ -1,37 +1,80 @@
 require('./styles.css');
 
 import React, { Component, PropTypes } from 'react';
-import { isEqual, chunk } from 'lodash';
+import { isEqual, chunk, cloneDeep } from 'lodash';
 
 import Avatar from 'material-ui/Avatar';
-import { List, ListItem, makeSelectable } from 'material-ui/List';
+import { List } from 'material-ui/List';
 import Subheader from 'material-ui/Subheader';
 import Divider from 'material-ui/Divider';
 import OpenInNew from 'material-ui/svg-icons/action/open-in-new';
 import FlatButton from 'material-ui/FlatButton';
+import IconButton from 'material-ui/IconButton';
 import PrevIcon from 'material-ui/svg-icons/hardware/keyboard-arrow-left';
 import NextIcon from 'material-ui/svg-icons/hardware/keyboard-arrow-right';
 
-const SelectableList = makeSelectable(List);
-
 const chunkUnit = 10;
 
+const rightButtonStyle = {
+  top: '4px',
+  right: '0px',
+  position: 'absolute',
+};
+
+const rightIconStyle = {
+  userSelect: 'none',
+  display: 'block',
+  fill: 'rgb(117, 117, 117)',
+  height: '24px',
+  width: '24px',
+  color: 'rgba(0, 0, 0, 0.870588)',
+};
+
+const avatarStyle = {
+  userSelect: 'none',
+  color: 'rgb(255, 255, 255)',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '20px',
+  borderRadius: '50%',
+  backgroundColor: 'rgb(188, 188, 188)',
+  width: '40px',
+  position: 'absolute',
+  top: '8px',
+  left: '16px',
+  height: '40px',
+};
+
+const triggerSelection = (props, selected) => {
+  props.onSelection(selected.map(i => ({ friend: props.friends[i], index: i })));
+};
+
 class FriendsList extends Component {
-  state = { selectedIndex: 0, pagingIndex: 0 };
+  state = { selectedIndexs: [0], pagingIndex: 0 };
 
   componentWillReceiveProps(nextProps) {
     if (!isEqual(this.props.friends, nextProps.friends)) {
-      nextProps.onSelection(nextProps.friends[this.state.selectedIndex], this.state.selectedIndex);
+      triggerSelection(nextProps, this.state.selectedIndexs);
     }
   }
 
   componentDidMount() {
-    this.props.onSelection(this.props.friends[this.state.selectedIndex], this.state.selectedIndex);
+    triggerSelection(this.props, this.state.selectedIndexs);
   }
 
-  handleSelection = (event, index) => {
-    this.setState({ selectedIndex: index });
-    this.props.onSelection(this.props.friends[index], index);
+  handleSelection = (index) => {
+    const { selectedIndexs } = this.state;
+    let newSelected = cloneDeep(selectedIndexs);
+    const foundIndex = selectedIndexs.indexOf(index);
+    if (foundIndex > -1) {
+      newSelected.splice(foundIndex, 1);
+    } else {
+      newSelected.push(index);
+    }
+    this.setState({ selectedIndexs: newSelected });
+    triggerSelection(this.props, newSelected);
+    this.props.onSelection(newSelected.map(i => ({ friend: this.props.friends[i], index: i })));
   };
 
   prev = () => {
@@ -55,6 +98,11 @@ class FriendsList extends Component {
     }
   };
 
+  isSelected = (index) => {
+    const { pagingIndex, selectedIndexs } = this.state;
+    return selectedIndexs.indexOf(index + (chunkUnit * pagingIndex)) > -1;
+  }
+
   render() {
     const { pagingIndex } = this.state;
     const { friends, hasMore } = this.props;
@@ -62,23 +110,30 @@ class FriendsList extends Component {
     const atEnd = pagingIndex === chunked.length - 1 && !hasMore;
     return (
       <div className="FreindsList">
-        <SelectableList
-          value={this.state.selectedIndex}
-          onChange={this.handleSelection}
-        >
+        <List>
           <Subheader>Friends</Subheader>
           <Divider />
           {pagingIndex < chunked.length ? (chunked[pagingIndex].map((friend, i) => (
-            <ListItem
-              key={i + (chunkUnit * pagingIndex)}
-              value={i + (chunkUnit * pagingIndex)}
-              className="FreindsList-item"
-              primaryText={friend.name}
-              leftAvatar={<Avatar src={friend.picture.data.url} />}
-              rightIcon={<OpenInNew />}
-            />
+            <div key={i + (chunkUnit * pagingIndex)}>
+              <span
+                className={`FriendsList-item ${this.isSelected(i) ? 'is-selected' : ''}`}
+              >
+                <div>
+                  <div className="FriendsList-item-inner">
+                    <IconButton
+                      onClick={this.handleSelection.bind(this, i + (chunkUnit * pagingIndex))}
+                      style={rightButtonStyle}
+                    >
+                      <OpenInNew viewBox="0 0 24 24" style={rightIconStyle} />
+                    </IconButton>
+                    <Avatar src={friend.picture.data.url} style={avatarStyle} />
+                    <div>{friend.name}</div>
+                  </div>
+                </div>
+              </span>
+            </div>
           ))) : null}
-        </SelectableList>
+        </List>
         <div className="FreindsList-actions">
           <FlatButton icon={<PrevIcon />} onClick={this.prev} disabled={pagingIndex === 0} />
           <FlatButton icon={<NextIcon />} onClick={this.next} disabled={atEnd} />
