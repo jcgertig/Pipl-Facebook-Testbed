@@ -1,4 +1,5 @@
 /* global google, Promise */
+import React, { PropTypes } from 'react';
 import { sortBy, has, get, isUndefined, isFunction, isString, isPlainObject } from 'lodash';
 
 export const clean = (str) => {
@@ -16,6 +17,82 @@ export const clean = (str) => {
     .replace(/^,\s/, '')
     .replace(/^,,\s/, '')
     .replace(/,\s,/g, ',');
+};
+
+export const DateBlock = (props) => (
+  <div style={{marginBottom: '10px'}}>
+    <div>{props.lineOne}</div>
+    <div>{props.lineTwo}</div>
+    {props.dateRange ? <div>{props.dateRange.start} - {isUndefined(props.dateRange.end) ? 'Present' : props.dateRange.end}</div> : null}
+  </div>
+);
+
+DateBlock.propTypes = {
+  lineOne: PropTypes.string.isRequired,
+  lineTwo: PropTypes.string.isRequired,
+  dateRange: PropTypes.shape({
+    start: PropTypes.string,
+    end: PropTypes.number,
+  }),
+};
+
+export const mapping = {
+  'names': {
+    node: false,
+    collection: true,
+    path: ({ first, last, middle, prefix, postfix }) => {
+      return clean(`${prefix} ${first} ${middle} ${last} ${postfix}`);
+    },
+    text: 'Name',
+  },
+  'dob': {
+    path: 'date_range.start',
+    text: 'Date of Birth',
+  },
+  'gender': {
+    path: 'content',
+    text: 'Gender',
+  },
+  'phones': {
+    collection: true,
+    path: 'number',
+    text: 'Phone Numbers',
+  },
+  'addresses': {
+    collection: true,
+    path: ({ house, street, city, state, zipCode, country }) => {
+      return clean(`${house} ${street}, ${city}, ${state} ${zipCode}, ${country}`);
+    },
+    text: 'Addresses',
+  },
+  'relationships': {
+    collection: true,
+    path: (item) => {
+      const { first, last, middle, prefix, postfix } = item.names[0];
+      return clean(`${prefix} ${first} ${middle} ${last} ${postfix}`);
+    },
+    text: 'Relationships',
+  },
+  'jobs': {
+    collection: true,
+    path: (item) => {
+      return new DateBlock({ lineOne: item.title, lineTwo: item.organization, dateRange: item.dateRange });
+    },
+    text: 'Jobs',
+  },
+  'educations': {
+    collection: true,
+    path: (item) => {
+      return new DateBlock({ lineOne: item.degree, lineTwo: item.school, dateRange: item.dateRange });
+    },
+    text: 'Education',
+  },
+  'usernames': {
+    node: false,
+    collection: true,
+    path: 'content',
+    text: 'Usernames',
+  },
 };
 
 export function compareString(addressLatLang, stringA, stringB) {
@@ -280,7 +357,7 @@ export function buildConnections(addressLatLang, userA, pipls, compared) {
         if (has(compared, `${userA.id}-vs-${pipl.id}`) || has(compared, `${pipl.id}-vs-${userA.id}`)) {
           return null;
         }
-        compared[`${userA.id}-vs-${pipl.id}`] = { userA, userB: pipl, data };
+        return (compared[`${userA.id}-vs-${pipl.id}`] = { userA, userB: pipl, data });
       }));
     }
     return Promise.all(proms)
