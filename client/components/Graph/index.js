@@ -2,11 +2,9 @@
 
 require('./styles.css');
 
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { has } from 'lodash';
-import { mapping } from 'utils/pipl';
-import { updateGraph, enterNode, enterLink, updateNode, updateLink, genNodes } from 'utils/graph';
+import { updateGraph, enterNode, enterLink, updateNode, updateLink } from 'utils/graph';
 
 
 class Graph extends Component {
@@ -43,11 +41,6 @@ class Graph extends Component {
     d3Links.exit().remove();
     d3Links.call((sel) => updateLink(sel, nextProps.nodes));
 
-    // we should actually clone the nodes and links
-    // since we're not supposed to directly mutate
-    // props passed in from parent, and d3's force function
-    // mutates the nodes and links array directly
-    // we're bypassing that here for sake of brevity in example
     this.force.nodes(nextProps.nodes).links(nextProps.links);
     this.force.start();
 
