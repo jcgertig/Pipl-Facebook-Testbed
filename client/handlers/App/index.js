@@ -71,8 +71,8 @@ class App extends Component {
     const noPipl = selectedUsers.filter((item) => !has(item.friend, 'pipl'));
     if (noPipl.length > 0) {
       for (const person of noPipl) {
-        const { friend: { firstName, lastName, id }, index } = person;
-        this.props.dispatch(getPiplForFriend(firstName, lastName, id, index));
+        const { friend: { firstName, lastName, picture }, index } = person;
+        this.props.dispatch(getPiplForFriend(firstName, lastName, encodeURIComponent(picture.data.url), index));
       }
     }
     this.setState({ selectedUsers });

@@ -45,25 +45,30 @@ export const getMoreFriends = (path) => {
 
 export const findBestMatch = (data) => {
   return (dispatch, getState) => {
+    console.log('DATA', data);
     const { currentUser: { piplData }, friends: { addressLatLang } } = getState();
-    compareAll(addressLatLang, piplData.base_data, data.pipl.baseData)
-      .then((res) => {
-        dispatch(setLatLang(res.addressLatLang));
-        const filtered = res.data.filter((item) => item.value !== 0);
-        if (filtered.length === 0 && res.data.length > 0) {
-          dispatch(addPiplToFriend({ index: data.index, pipl: res.data[0] }));
-        } else if (filtered.length > 0) {
-          dispatch(addPiplToFriend({ index: data.index, pipl: filtered[0] }));
-        } else {
-          dispatch(addPiplToFriend({ index: data.index, pipl: null }));
-        }
-      });
+    if (data.pipl.baseData === null) {
+      dispatch(addPiplToFriend({ index: data.index, pipl: null }));
+    } else {
+      compareAll(addressLatLang, piplData.base_data, data.pipl.baseData)
+        .then((res) => {
+          dispatch(setLatLang(res.addressLatLang));
+          const filtered = res.data.filter((item) => item.value !== 0);
+          if (filtered.length === 0 && res.data.length > 0) {
+            dispatch(addPiplToFriend({ index: data.index, pipl: res.data[0] }));
+          } else if (filtered.length > 0) {
+            dispatch(addPiplToFriend({ index: data.index, pipl: filtered[0] }));
+          } else {
+            dispatch(addPiplToFriend({ index: data.index, pipl: null }));
+          }
+        });
+    }
   };
 };
 
-export const getPiplForFriend = (firstName, lastName, fbId, index) => {
+export const getPiplForFriend = (firstName, lastName, url, index) => {
   return (dispatch, getState) => {
-    Api.getPiplForFriend({ firstName, lastName, fbId })
+    Api.getPiplForFriend({ firstName, lastName, url })
       .then((res) => dispatch(findBestMatch({ index, pipl: keysToCamel(res.data.pipl_info) })))
       .catch((res) => { console.log('err', res); });
   };

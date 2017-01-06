@@ -5,7 +5,7 @@ class Api::V1::PiplController < API::V1::BaseController
   end
 
   def find
-    @pipl = PiplInfo.from_basic(params[:fb_id], params[:first_name], params[:last_name])
+    @pipl = PiplInfo.from_basic(current_user.id, params[:first_name], params[:last_name])
     render json: @pipl, serializer: PiplSerializer, status: :ok
   end
 

@@ -12,6 +12,6 @@ export default {
   getPiplForFriend: generateRequest({
     token: true,
     method: 'GET',
-    route: '/v1/pipl?first_name=:firstName&last_name=:lastName&fb_id=:fbId',
+    route: '/v1/pipl?first_name=:firstName&last_name=:lastName&url=:url',
   }),
 };

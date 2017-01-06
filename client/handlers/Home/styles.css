@@ -10,3 +10,25 @@
   margin: 0 auto;
   max-width: 80%;
 }
+
+.Home-center {
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.Home-grid {
+  width: 270px;
+}
+
+.Home-graph {
+  display: flex;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  width: 270px;
+  height: 270px;
+  background-image: url('/public/imgs/graph.png');
+}

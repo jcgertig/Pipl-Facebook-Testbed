@@ -20,29 +20,35 @@ const height = 815;
 
 
 class InfoBlock extends Component {
-  state = { compared: {}, nodes: [], links: [] };
+  state = { compared: {}, comparing: false, nodes: [], links: [] };
 
   componentWillReceiveProps(nextProps) {
     const { compared } = this.state;
     const { addressLatLang, currentUser } = nextProps;
     const users = cloneDeep(nextProps.users);
-    if (users.length > 0 && !isEqual(users, this.props.users)) {
+    console.log('USERS', users.length);
+    if (users.length > 1 && !isEqual(users, this.props.users)) {
       users.push({ friend: modUser(currentUser), index: -1 });
-      for (const userA of users) {
-        const otherUsers = users.filter(user => user.friend.id !== userA.friend.id).map(user => user.friend);
-        buildConnections(addressLatLang, userA.friend, otherUsers, compared)
-          .then(val => {
-            const newCompared = val.compared;
-            const { nodes, links } = genNodes(mapping, users, newCompared, this.state.nodes, this.block.clientWidth, height);
-            this.setState({ compared: newCompared, nodes, links });
-          });
-      }
+      this.setState({ comparing: true, nodes: [], links: [] }, () => {
+        for (const userA of users) {
+          const otherUsers = users.filter(user => user.friend.id !== userA.friend.id).map(user => user.friend);
+          buildConnections(addressLatLang, userA.friend, otherUsers, compared)
+            .then(val => {
+              const newCompared = val.compared;
+              const { nodes, links } = genNodes(mapping, users, newCompared, this.state.nodes, this.block.clientWidth, height);
+              console.log('DONE COMPARING');
+              this.setState({ compared: val.allCompared, comparing: false, nodes, links });
+            });
+        }
+      });
+    } else if (users.length <= 1) {
+      this.setState({ nodes: [], links: [] });
     }
   }
 
   renderPipl = () => {
     const { users } = this.props;
-    const { nodes, links, compared } = this.state;
+    const { nodes, links, comparing } = this.state;
     if (users.length === 1) {
       return users.map(({ friend: { pipl, name } }, i) => {
         const key = `${name}-${i}`;
@@ -61,7 +67,7 @@ class InfoBlock extends Component {
     }
 
     if (users.length > 1) {
-      if (Object.keys(compared).length === 0) {
+      if (comparing) {
         return <PiplOption basic isLoading text="Comparing Friends" />;
       }
 

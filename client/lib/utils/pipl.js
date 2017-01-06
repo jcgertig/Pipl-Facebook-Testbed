@@ -336,14 +336,20 @@ export function compare(addressLatLang, piplA, piplB) {
   });
 }
 
-export function buildConnections(addressLatLang, userA, pipls, compared) {
+export function buildConnections(addressLatLang, userA, pipls, allCompared) {
+  let compared = {};
   return new Promise((done, fail) => {
     if (userA === null || pipls === null) {
       return done(null);
     }
     const proms = [];
     for (const pipl of pipls) {
-      if (has(compared, `${userA.id}-vs-${pipl.id}`) || has(compared, `${pipl.id}-vs-${userA.id}`)) {
+      if (has(allCompared, `${userA.id}-vs-${pipl.id}`) || has(allCompared, `${pipl.id}-vs-${userA.id}`)) {
+        if (has(allCompared, `${userA.id}-vs-${pipl.id}`)) {
+          compared[`${userA.id}-vs-${pipl.id}`] = allCompared[`${userA.id}-vs-${pipl.id}`];
+        } else {
+          compared[`${pipl.id}-vs-${userA.id}`] = allCompared[`${pipl.id}-vs-${userA.id}`];
+        }
         return null;
       }
       if (!has(userA, 'pipl') || !has(pipl, 'pipl') || !has(userA.pipl, 'pipl') || !has(pipl.pipl, 'pipl')) {
@@ -354,15 +360,21 @@ export function buildConnections(addressLatLang, userA, pipls, compared) {
       }
 
       proms.push(getConnections(addressLatLang, userA.pipl.pipl, pipl.pipl.pipl).then((data) => {
-        if (has(compared, `${userA.id}-vs-${pipl.id}`) || has(compared, `${pipl.id}-vs-${userA.id}`)) {
+        if (has(allCompared, `${userA.id}-vs-${pipl.id}`) || has(allCompared, `${pipl.id}-vs-${userA.id}`)) {
+          if (has(allCompared, `${userA.id}-vs-${pipl.id}`)) {
+            compared[`${userA.id}-vs-${pipl.id}`] = allCompared[`${userA.id}-vs-${pipl.id}`];
+          } else {
+            compared[`${pipl.id}-vs-${userA.id}`] = allCompared[`${pipl.id}-vs-${userA.id}`];
+          }
           return null;
         }
-        return (compared[`${userA.id}-vs-${pipl.id}`] = { userA, userB: pipl, data });
+        compared[`${userA.id}-vs-${pipl.id}`] = { userA, userB: pipl, data };
+        return (allCompared[`${userA.id}-vs-${pipl.id}`] = { userA, userB: pipl, data });
       }));
     }
     return Promise.all(proms)
-      .then(() => done({ compared, addressLatLang }))
-      .catch(() => done({ compared, addressLatLang }));
+      .then(() => done({ compared, allCompared, addressLatLang }))
+      .catch(() => done({ compared, allCompared, addressLatLang }));
   });
 }
 

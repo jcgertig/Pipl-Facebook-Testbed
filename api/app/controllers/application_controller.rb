@@ -14,10 +14,11 @@ class ApplicationController < ActionController::Base
   end
 
   def after_sign_in_path_for(resource)
-    "http://localhost:4000/login?t=#{token.token}"
+    puts "file:///Users/jonathangertig/sidework/pipl-facebook-desktop/app/app.html#/login?t=#{token.token}"
+    "file:///Users/jonathangertig/sidework/pipl-facebook-desktop/app/app.html#/login?t=#{token.token}"
   end
 
   def after_sign_out_path_for(resource)
-    "http://localhost:4000"
+    "file:///Users/jonathangertig/sidework/pipl-facebook-desktop/app/app.html#/"
   end
 end

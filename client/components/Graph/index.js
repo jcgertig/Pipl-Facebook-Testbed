@@ -24,9 +24,18 @@ class Graph extends Component {
       // and React doesn't have to go through lifecycle on each tick
       this.d3Graph.call((sel) => updateGraph(sel, this.props.nodes));
     });
+    if (this.props.nodes.length > 0) {
+      this.runGraph(this.props);
+    }
   }
 
   shouldComponentUpdate(nextProps) {
+    this.runGraph(nextProps);
+
+    return false;
+  }
+
+  runGraph = (nextProps) => {
     this.d3Graph = d3.select(ReactDOM.findDOMNode(this.graph));
 
     const d3Nodes = this.d3Graph.selectAll('.node')
@@ -43,8 +52,6 @@ class Graph extends Component {
 
     this.force.nodes(nextProps.nodes).links(nextProps.links);
     this.force.start();
-
-    return false;
   }
 
   render() {

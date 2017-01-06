@@ -18,7 +18,8 @@ class PiplInfo < ApplicationRecord
   end
 
   def self.from_basic(id, first_name, last_name)
-    where(fb_id: id).first_or_create do |pipl_info|
+    options = { id: id, first_name: first_name, last_name: last_name }
+    where(fb_id: options.hash).first_or_create do |pipl_info|
       response = Pipl::client.search first_name: first_name, last_name: last_name
       if response.person
         pipl_info.base_data = response.person.to_json

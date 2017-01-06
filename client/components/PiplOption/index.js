@@ -29,8 +29,8 @@ const PiplOption = (props) => {
   if (!props.basic && props.option) {
     const mapped = [];
     for (const key of Object.keys(mapping)) {
-      if (has(this.props.option, key)) {
-        const base = this.props.option[key];
+      if (has(props.option, key)) {
+        const base = props.option[key];
         const { path, text, collection } = mapping[key];
         let val = [];
         if (collection) {

@@ -29,6 +29,8 @@
 
 dump.rdb
 
+*/*.log
+
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml

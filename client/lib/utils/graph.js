@@ -38,23 +38,23 @@ export const genNodes = (mapping, users, connections, oldNodes, width, height) =
               target = `${valB}-${valA}`;
             } else if (isUndefined(find(nodes, { key: target }))) {
               nodes.push({
-                key: valA + '-' + valB,
+                key: target,
                 text: valA,
                 size: 4,
               });
             }
-            if (isUndefined(find(links, { key: userA.id + '-' + target }))) {
-              console.log(userA.id, userB.id);
+
+            if (isUndefined(find(links, { key: `${userA.id}-${target}` }))) {
               links.push({
                 source: userA.id,
                 target: target,
-                key: userA.id + '-' + target,
+                key: `${userA.id}-${target}`,
                 size: 1,
               });
               links.push({
                 source: userB.id,
                 target: target,
-                key: userB.id + '-' + target,
+                key: `${userB.id}-${target}`,
                 size: 1,
               });
             }
@@ -65,6 +65,7 @@ export const genNodes = (mapping, users, connections, oldNodes, width, height) =
   }
 
   maintainNodePositions(oldNodes, nodes, width, height);
+  console.log('GEN NODES', { nodes, links });
   return { nodes, links };
 };
 
