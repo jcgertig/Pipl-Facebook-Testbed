@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500');
+
+* {
+  font-family: 'Roboto', sans-serif;
+  box-sizing: border-box;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  color: $fontColor;
+
+  margin-bottom: 0;
+  background-color: $bgColor;
+
+  &.scrolling {
+    padding-top: 380px;
+  }
+}
+
+a {
+  text-decoration: none;
+}
+
+.node circle {
+  fill: #888888;
+  stroke: #fff;
+  stroke-width: 2px;
+}
+
+.node text {
+  fill: #888888;
+  stroke: none;
+  font-size: .6em;
+}
+
+.link {
+  stroke: #cccccc;
+  stroke-opacity: .6;
+}
+
+.is-sticky {
+  background-color: $lightbgColor;
+  box-shadow: 0px 0px 75px 0px rgba(136,119,177,0.20);
+}
+
+.is-sticky .TopBar {
+  height: 60px;
+  padding-bottom: 0px;
+}
+
+.is-sticky .TopBar-logo {
+  width: 100px;
+}
+
+.is-sticky .TopBar-link {
+  padding-bottom: 5px;
+}
+
+.is-sticky .TopBar-profile-img img{
+  width: 30px;
+}
+
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+#root {
+  margin: -8px;
+  height: 100vh;
+}
+
+.app-title-bar {
+
+}
+
+.app-wrapper {
+  height: 100vh;
+  min-width: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.app-container {
+  width: 100vw;
+  overflow-y: scroll;
+}
+
+.darwin-background {
+  background-color: rgb(236, 236, 236);
+}
+
+.darwin-app-wrapper {
+  padding: 10px;
+  height: calc(100vh - 22px);
+}
+
+.win32-background {
+  background-color: rgb(255, 255, 255);
+}
+
+.win32-app-wrapper {
+  padding: 12px;
+  height: calc(100vh - 31px);
+}
+
+*:before {
+  box-sizing: border-box;
+}
+
+*:after {
+  box-sizing: border-box;
+}
+
+h1 {
+  text-align: center;
+  font-size: 36px;
+  line-height: 43px;
+  letter-spacing: 0.43px;
+  font-weight: 500;
+}
+
+.Clickable {
+  cursor: pointer;
+}

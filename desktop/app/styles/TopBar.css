@@ -1,0 +1,75 @@
+/** @define TopBar; use strict */
+
+.TopBar {
+  max-width: 1400px;
+  margin: 0 auto;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.TopBar-col-left, .TopBar-col-center, .TopBar-col-right {
+  display: flex;
+  flex: 1;
+  align-items: center;
+}
+
+.TopBar-col-center {
+  justify-content: space-around;
+}
+
+.TopBar-col-right {
+  justify-content: flex-end;
+}
+
+.TopBar-col-right ul li {
+  vertical-align: middle;
+}
+
+.TopBar-logo {
+  width: 140px;
+}
+
+.TopBar-link {
+  font-size: 16px;
+  line-height: 24px;
+  padding-bottom: 13px;
+  text-decoration: none;
+}
+
+.TopBar-list-link li {
+  margin-left: 50px;
+}
+
+.TopBar-link-active {
+  color: #5D5770;
+  border-bottom: 2px solid #4B249F;
+}
+
+.TopBar-profile {
+  height: 40px;
+}
+
+.TopBar-notifications {
+  width: 32px;
+}
+
+.TopBar-icon-cage {
+  display: inline-block;
+}
+
+.TopBar-icon-cage svg, .TopBar-icon-cage img {
+  width: 24px;
+  height: auto;
+}
+
+.TopBar-profile-img {
+  display: inline-block;
+}
+
+.TopBar-profile-img img {
+  width: 40px;
+  height: auto;
+}

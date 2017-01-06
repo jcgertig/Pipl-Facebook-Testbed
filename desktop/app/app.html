@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Hello Electron React!</title>
+    <script>
+      (function() {
+        if (!process.env.HOT) {
+          const link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = './dist/style.css';
+          // HACK: Writing the script path should be done with webpack
+          document.getElementsByTagName('head')[0].appendChild(link);
+        }
+      }());
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDU6Gy_x7IKOThrjv41hW7u52-3aH0kVMk&libraries=geometry"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      window.fbAsyncInit = function() {
+        FB.init({
+          appId      : '1612840769023597',
+          xfbml      : true,
+          version    : 'v2.8'
+        });
+      };
+
+      (function(d, s, id){
+         var js, fjs = d.getElementsByTagName(s)[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement(s); js.id = id;
+         js.src = "https://connect.facebook.net/en_US/sdk.js";
+         fjs.parentNode.insertBefore(js, fjs);
+       }(document, 'script', 'facebook-jssdk'));
+    </script>
+    <script>
+      {
+        const script = document.createElement('script');
+        const port = process.env.PORT || 3000;
+        script.src = (process.env.HOT)
+          ? 'http://localhost:' + port + '/dist/bundle.js'
+          : './dist/bundle.js';
+        // HACK: Writing the script path should be done with webpack
+        document.body.appendChild(script);
+      }
+    </script>
+  </body>
+</html>
