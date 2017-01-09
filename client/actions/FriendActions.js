@@ -1,8 +1,6 @@
 /* global FB */
 
 import { createAction } from 'redux-actions';
-import { setErrors } from 'ErrorActions';
-// import {cloneDeep} from 'lodash';
 import { collectionToCamel, keysToCamel } from 'utils/general';
 import { compareAll } from 'utils/pipl';
 import Api from 'api';

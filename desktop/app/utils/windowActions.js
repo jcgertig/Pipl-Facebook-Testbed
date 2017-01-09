@@ -56,6 +56,10 @@ export function addFileChangeHandler(renderer, cb) {
   renderer.on(FILE_CHANGED, cb);
 }
 
+export function removeFileChangeHandler(renderer, cb) {
+  renderer.removeListener(FILE_CHANGED, cb);
+}
+
 export function addSaveTriggerHandler(renderer, cb) {
   renderer.on(TRIGGER_SAVE, cb);
 }

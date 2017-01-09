@@ -22,7 +22,7 @@ ipcMain.on(REGISTER, (event) => {
 });
 
 ipcMain.on(DATA_READY_FOR_SAVE, () => {
-  saveFile(mainRenderer, renderer);
+  saveFile(() => {}, (c) => c);
 });
 
 ipcMain.on(TRIGGER_FILE_OPEN, (event, argString) => {

@@ -22,23 +22,6 @@ a {
   text-decoration: none;
 }
 
-.node circle {
-  fill: #888888;
-  stroke: #fff;
-  stroke-width: 2px;
-}
-
-.node text {
-  fill: #888888;
-  stroke: none;
-  font-size: .6em;
-}
-
-.link {
-  stroke: #cccccc;
-  stroke-opacity: .6;
-}
-
 .is-sticky {
   background-color: $lightbgColor;
   box-shadow: 0px 0px 75px 0px rgba(136,119,177,0.20);

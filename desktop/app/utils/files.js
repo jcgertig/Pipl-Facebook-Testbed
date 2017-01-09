@@ -94,6 +94,32 @@ export function openFile(mainRenderer, renderer, filters = baseFilters) {
   });
 }
 
+export function getFilePath(cb) {
+  storage.has(FILE, (error, hasKey) => {
+    if (hasKey) {
+      storage.get(FILE, (innerError, data) => {
+        if (innerError) {
+          cb(null, innerError);
+        } else {
+          cb(data.filePath);
+        }
+      });
+    } else {
+      cb(null, error);
+    }
+  });
+}
+
+export function setFilePath(filePath, cb) {
+  storage.set(FILE, { filePath }, (error) => {
+    if (error) {
+      cb(false);
+    } else {
+      cb(true);
+    }
+  });
+}
+
 export function getJSONFileContent() {
   return getFileContent(JSON.parse);
 }

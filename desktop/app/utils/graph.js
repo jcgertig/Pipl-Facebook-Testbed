@@ -72,11 +72,16 @@ export const genNodes = (mapping, users, connections, oldNodes, width, height) =
 export const enterNode = (selection, force) => {
   selection.classed('node', true);
 
+  const nodeCircleStyle = 'fill: #888888;stroke: #fff;stroke-width: 2px;';
+  const nodeTextStyle = 'fill: #888888;stroke: none;font-size: .6em;';
+
   selection.append('circle')
+    .attr('style', 'fill: #888888;stroke: #fff;stroke-width: 2px;')
     .attr('r', (d) => d.size)
     .on('drag', force.drag);
 
   selection.append('text')
+    .attr('style', 'fill: #888888;stroke: none;font-size: .6em;')
     .attr('x', (d) => d.size + 5)
     .attr('dy', '.35em')
     .text((d) => d.text);
@@ -88,6 +93,8 @@ export const updateNode = (selection) => {
 
 export const enterLink = (selection) => {
   selection.classed('link', true)
+    .attr('stroke', '#cccccc')
+    .attr('style', 'stroke-opacity: .6;')
     .attr('stroke-width', (d) => d.size);
 };
 
